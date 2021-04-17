@@ -8,12 +8,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Web.Mvc;
 using TRApi.Helpers;
 using TRApi.Models;
 
 namespace TRApi.Controllers
 {
 
+    [System.Web.Http.Authorize]
+    [RequireHttps]
     public class DropdownValuesController : ApiController
     {
         // Lista progetti autorizzati.

@@ -9,10 +9,13 @@ using TRApi.Helpers;
 using System.Net;
 using System.Net.Http;
 using System;
+using System.Web.Mvc;
 
 namespace TRApi.Controllers
 {
 
+    [System.Web.Http.Authorize]
+    [RequireHttps]
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class HoursController : ApiController
     {
