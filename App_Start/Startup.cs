@@ -13,5 +13,6 @@ namespace TRApi
         {
             ConfigureAuth(app); 
         }
+
     }
 }

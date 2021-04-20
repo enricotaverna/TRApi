@@ -6,6 +6,10 @@ using Microsoft.Owin.Security.Cookies;
 using Owin;
 using Microsoft.Owin.Security.OAuth;
 using WebApiOauth2.Helper_Code.OAuth2;
+using System.Configuration;
+using Microsoft.Owin.Security.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Net;
 
 // Vedere
 // https://www.c-sharpcorner.com/article/asp-net-mvc-oauth-2-0-rest-web-api-authorization-using-database-first-approach/
@@ -17,6 +21,41 @@ namespace TRApi
 {
     public partial class Startup
     {
+        
+        #region JWT Authentication 
+        private static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
+
+
+        public void ConfigureAuth(IAppBuilder app)
+        {
+            // NOTE: The usual WindowsAzureActiveDirectoryBearerAuthentication middleware uses a
+            // metadata endpoint which is not supported by the Microsoft identity platform endpoint.  Instead, this 
+            // OpenIdConnectSecurityTokenProvider implementation can be used to fetch & use the OpenIdConnect
+            // metadata document - which for the identity platform endpoint is https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
+
+            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions
+            {
+                AccessTokenFormat = new JwtFormat(
+                    new TokenValidationParameters
+                    {
+                        // Check if the audience is intended to be this application
+                        ValidAudiences = new[] { clientId, $"api://{clientId}" },
+
+                        // Change below to 'true' if you want this Web API to accept tokens issued to one Azure AD tenant only (single-tenant)
+                        // Note that this is a simplification for the quickstart here. You should validate the issuer. For details, 
+                        // see https://github.com/Azure-Samples/active-directory-dotnet-native-aspnetcore
+                        ValidateIssuer = false,
+
+                    },
+                    new OpenIdConnectSecurityKeyProvider("https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration")
+                ),
+            });
+        }
+
+
+        #endregion  
+
+
         #region Public /Protected Properties.  
 
         /// <summary>  
@@ -32,7 +71,7 @@ namespace TRApi
         #endregion
 
         // For more information on configuring authentication, please visit http://go.microsoft.com/fwlink/?LinkId=301864  
-        public void ConfigureAuth(IAppBuilder app)
+        public void ConfigureAuth_Old(IAppBuilder app)
         {
             // Enable the application to use a cookie to store information for the signed in user  
             // and to use a cookie to temporarily store information about a user logging in with a third party login provider  
@@ -71,8 +110,8 @@ namespace TRApi
 
             // Uncomment the following lines to enable logging in with third party login providers  
             //app.UseMicrosoftAccountAuthentication(  
-            //    clientId: "",  
-            //    clientSecret: "");  
+            //    clientId: ".....",  
+            //    clientSecret: ".....");  
 
             //app.UseTwitterAuthentication(  
             //   consumerKey: "",  
